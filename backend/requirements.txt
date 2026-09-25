@@ -4,6 +4,8 @@ python-multipart
 python-dotenv
 supabase
 groq
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
 sentence-transformers
 pypdf
 python-docx
