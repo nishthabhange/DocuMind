@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocuMind</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231f4034'/%3E%3Ccircle cx='20' cy='20' r='6' fill='%23d9f26b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Logo: a document page whose corner is a neural node (reused via <use>) -->
+  <svg width="0" height="0" style="position:absolute">
+    <symbol id="logo" viewBox="0 0 40 40">
+      <rect width="40" height="40" rx="10" fill="#1f4034"/>
+      <path d="M12 9h11l6 6v16a1 1 0 0 1-1 1H12a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z" fill="none" stroke="#f6f7f1" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M16 20l5 4 4-7M16 20l1 6" fill="none" stroke="#d9f26b" stroke-width="1.5"/>
+      <circle cx="16" cy="20" r="2.4" fill="#d9f26b"/><circle cx="21" cy="24" r="2.4" fill="#d9f26b"/>
+      <circle cx="25" cy="17" r="2.4" fill="#d9f26b"/><circle cx="17" cy="26" r="1.8" fill="#d9f26b"/>
+    </symbol>
+  </svg>
+
+  <header class="navbar">
+    <a href="#" class="brand"><svg class="logo"><use href="#logo"/></svg><span>DocuMind</span></a>
+    <nav id="nav" hidden>
+      <button data-view="documents" class="active">Documents</button>
+      <button data-view="chat">Chat</button>
+      <button data-view="search">Search</button>
+      <button data-view="stats">Statistics</button>
+      <span id="userEmail" class="user-email"></span>
+      <button id="logoutButton" class="secondary-button">Log out</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Login / Sign up -->
+    <section id="authView" class="auth-layout">
+      <div class="auth-hero">
+        <h1>Ask your documents<br><span>anything.</span></h1>
+        <p class="subtitle">Upload a PDF, Word or text file and get an instant summary, then search it by meaning or chat with it.</p>
+        <ul class="feature-list">
+          <li><strong>AI summaries</strong><span>Key points, keywords and follow-up questions in seconds.</span></li>
+          <li><strong>Search by meaning</strong><span>Find the right passage even when the words differ.</span></li>
+          <li><strong>Chat with sources</strong><span>Every answer shows the pages it came from.</span></li>
+        </ul>
+      </div>
+
+      <div class="auth-panel">
+        <div class="auth-tabs">
+          <button type="button" id="tabLogin" class="active">Log in</button>
+          <button type="button" id="tabSignup">Sign up</button>
+        </div>
+        <h3 id="authTitle">Welcome back</h3>
+        <p id="authHint" class="muted-text">Log in to open your documents.</p>
+
+        <form id="authForm" class="auth-form">
+          <label>Email
+            <input id="email" type="email" placeholder="you@example.com" required autocomplete="email">
+          </label>
+          <label>Password
+            <div class="password-wrap">
+              <input id="password" type="password" placeholder="At least 6 characters" required minlength="6" autocomplete="current-password">
+              <button type="button" id="togglePassword" class="link-button">Show</button>
+            </div>
+          </label>
+          <label id="confirmRow" hidden>Confirm password
+            <input id="confirmPassword" type="password" placeholder="Repeat your password" autocomplete="new-password">
+          </label>
+          <button type="submit" id="authSubmit" class="primary-button">Log in</button>
+          <p id="authStatus" class="status" role="status"></p>
+        </form>
+
+        <p class="switch-text"><span id="switchText">New to DocuMind?</span>
+          <button type="button" id="switchLink" class="link-button">Create an account</button></p>
+      </div>
+    </section>
+
+    <!-- Documents -->
+    <section id="view-documents" class="view" hidden>
+      <form id="uploadForm">
+        <label for="fileInput" class="upload-box">
+          <span class="upload-icon">↑</span>
+          <strong>Choose your document</strong>
+          <span>PDF, DOCX, or TXT · Maximum 20 MB · PDFs need a text layer (scanned/image-only PDFs aren't supported)</span>
+          <input id="fileInput" type="file" accept=".pdf,.docx,.txt" hidden>
+        </label>
+        <p id="uploadStatus" class="status"></p>
+      </form>
+      <div class="section-heading"><p class="eyebrow">YOUR LIBRARY</p><h3>Documents</h3></div>
+      <div id="docList" class="pages-list"></div>
+    </section>
+
+    <!-- Analysis of one document -->
+    <section id="view-analysis" class="view" hidden>
+      <div class="analysis-topbar">
+        <div><p class="eyebrow">DOCUMENT ANALYSIS</p><h2 id="documentName"></h2><p id="uploadedTime" class="muted-text"></p></div>
+        <div class="button-row">
+          <button id="downloadButton" class="secondary-button">Download original</button>
+          <button id="backButton" class="secondary-button">← Back</button>
+        </div>
+      </div>
+      <div id="metrics" class="metrics-grid"></div>
+      <div class="primary-analysis-grid">
+        <article class="card"><p class="eyebrow">AI SUMMARY</p><h3>What this document is about</h3><p id="summaryText" class="summary-text"></p></article>
+        <article class="card"><p class="eyebrow">KEY CONCEPTS</p><h3>Keywords</h3><div id="keywords" class="tag-list"></div></article>
+      </div>
+      <div class="two-col">
+        <article class="card"><h3>Important Points</h3><ul id="importantPoints" class="analysis-list"></ul></article>
+        <article class="card"><h3>Suggested Questions</h3><p class="card-description">Click one to ask it in Chat.</p><ul id="suggestedQuestions" class="analysis-list"></ul></article>
+        <article class="card"><h3>Security Observations</h3><ul id="securityNotes" class="analysis-list"></ul></article>
+        <article class="card"><h3>Document Information</h3><dl id="metadataList" class="metadata-list"></dl></article>
+      </div>
+      <div class="section-heading"><p class="eyebrow">PAGE-WISE CONTENT</p><h3>Extracted text</h3></div>
+      <div id="pagesList" class="pages-list"></div>
+    </section>
+
+    <!-- Chat -->
+    <section id="view-chat" class="view" hidden>
+      <div class="section-heading"><p class="eyebrow">RAG CHAT</p><h3>Chat with your documents</h3></div>
+      <select id="chatDoc"></select>
+      <div id="messages" class="messages"></div>
+      <form id="chatForm" class="inline-form">
+        <input id="chatInput" placeholder="Ask a question about your documents..." required minlength="2">
+        <button class="primary-button">Ask</button>
+      </form>
+    </section>
+
+    <!-- Search -->
+    <section id="view-search" class="view" hidden>
+      <div class="section-heading"><p class="eyebrow">SEMANTIC SEARCH</p><h3>Search by meaning</h3></div>
+      <form id="searchForm" class="inline-form">
+        <input id="searchInput" placeholder="Describe what you are looking for..." required minlength="2">
+        <button class="primary-button">Search</button>
+      </form>
+      <div id="searchResults" class="pages-list"></div>
+    </section>
+
+    <!-- Statistics -->
+    <section id="view-stats" class="view" hidden>
+      <div class="section-heading"><p class="eyebrow">DASHBOARD</p><h3>Your statistics</h3></div>
+      <div id="statsGrid" class="metrics-grid"></div>
+    </section>
+  </main>
+
+  <footer><p>DocuMind · Secure cloud document intelligence</p></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
